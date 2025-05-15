@@ -122,10 +122,14 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
       const binned = d3.groups(values, d => Math.round(d.norm_time / binSize) * binSize)
         .map(([t, pts]) => {
           const v = pts.map(p => p.value);
+          const mean = d3.mean(v);
+          const sd = d3.deviation(v);
           return {
             norm_time: +t,
-            mean: d3.mean(v),
-            sd: d3.deviation(v)
+            mean: mean,
+            sd: sd,
+            values: v,
+            zScores: v.map(val => sd ? (val - mean) / sd : 0)
           };
         });
       return { key, values: binned.sort((a, b) => a.norm_time - b.norm_time) };
@@ -179,6 +183,10 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
         hoverLine.attr("x1", cx).attr("x2", cx).style("opacity", 1);
         hoverCircle.attr("cx", cx).attr("cy", cy).style("opacity", 1);
 
+        const avgZScore = closest.zScores && closest.zScores.length
+          ? d3.mean(closest.zScores.map(Math.abs)).toFixed(2)
+          : "N/A";
+
         tooltip
           .style("opacity", 1)
           .html(`
@@ -187,10 +195,8 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
             Time: ${(closest.norm_time * 100).toFixed(1)}%<br>
             Mean: ${closest.mean?.toFixed(1) ?? "N/A"}<br>
             SD: ${closest.sd?.toFixed(1) ?? "N/A"}<br>
-            `)
-          .style("left", (event.pageX + 10) + "px")
-          .style("top", (event.pageY - 28) + "px");
-      })
+            Avg Z-Score: ${avgZScore}
+          `)
       .on("mouseout", () => {
         tooltip.style("opacity", 0);
         hoverLine.style("opacity", 0);
