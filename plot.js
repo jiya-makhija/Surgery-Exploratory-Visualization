@@ -38,6 +38,21 @@ const xAxis = d3.axisBottom(x).tickFormat(d3.format(".0%"));
 const yAxis = d3.axisLeft(y);
 const color = d3.scaleOrdinal(d3.schemeCategory10);
 
+// --- Create persistent hover elements outside updateChart so they're not recreated on every render ---
+const hoverLine = svg.append("line")
+  .attr("class", "hover-line")
+  .attr("stroke", "#aaa")
+  .attr("stroke-width", 1)
+  .attr("y1", 0)
+  .attr("y2", height)
+  .style("opacity", 0);
+
+const hoverCircle = svg.append("circle")
+  .attr("class", "hover-circle")
+  .attr("r", 4)
+  .attr("fill", "black")
+  .style("opacity", 0);
+
 // Load long-format data
 d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
   const vitalOptions = Array.from(new Set(data.map(d => d.signal)));
@@ -159,9 +174,28 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
       .on("mousemove", function (event, d) {
         const [xCoord] = d3.pointer(event);
         const timeAtCursor = x.invert(xCoord);
-        const closest = d.values.reduce((a, b) =>
+      
+        const validPoints = d.values.filter(pt => pt.mean != null);
+
+        const closest = validPoints.reduce((a, b) =>
           Math.abs(b.norm_time - timeAtCursor) < Math.abs(a.norm_time - timeAtCursor) ? b : a
         );
+
+      
+        const cx = x(closest.norm_time);
+        const cy = y(closest.mean);
+      
+        // Position and show hover elements
+        hoverLine
+          .attr("x1", cx)
+          .attr("x2", cx)
+          .style("opacity", 1);
+      
+        hoverCircle
+          .attr("cx", cx)
+          .attr("cy", cy)
+          .style("opacity", 1);
+
         tooltip
           .style("opacity", 1)
           .html(`
@@ -178,6 +212,8 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
       })
       .on("mouseout", function () {
         tooltip.style("opacity", 0);
+        hoverLine.style("opacity", 0);
+        hoverCircle.style("opacity", 0);
       });
 
     const legendContainer = d3.select("#legend");
