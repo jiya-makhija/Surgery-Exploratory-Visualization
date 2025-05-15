@@ -164,7 +164,12 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
         const [xCoord] = d3.pointer(event);
         const timeAtCursor = x.invert(xCoord);
         const validPoints = d.values.filter(pt => pt.mean != null);
-        const closest = validPoints.reduce((a, b) => Math.abs(b.norm_time - timeAtCursor) < Math.abs(a.norm_time - timeAtCursor) ? b : a);
+        if (validPoints.length === 0) return;
+
+        if (validPoints.length === 0) return;
+
+        const closest = validPoints.reduce((a, b) =>
+          Math.abs(b.norm_time - timeAtCursor) < Math.abs(a.norm_time - timeAtCursor) ? b : a, validPoints[0]);
         const cx = x(closest.norm_time);
         const cy = y(closest.mean);
 
