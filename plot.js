@@ -1,5 +1,5 @@
 const margin = { top: 50, right: 40, bottom: 50, left: 60 };
-const width = 1400 - margin.left - margin.right;
+const width = 1200 - margin.left - margin.right;
 const height = 600 - margin.top - margin.bottom;
 
 const svg = d3.select("svg")
