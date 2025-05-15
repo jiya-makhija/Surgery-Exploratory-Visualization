@@ -124,15 +124,17 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
     const summary = nested.map(([key, values]) => {
       const binSize = 0.01;
       const binned = d3.groups(values, d => Math.round(d.norm_time / binSize) * binSize)
-        .map(([t, pts]) => {
-          const v = pts.map(p => p.value);
-          const belowThreshold = threshold != null ? v.filter(val => val < threshold).length : null;
-          return {
-            norm_time: +t,
-            mean: d3.mean(v),
-            sd: d3.deviation(v),
-            thresholdPct: threshold != null ? (100 * belowThreshold / v.length).toFixed(1) : null
-          };
+      .map(([t, pts]) => {
+        const v = pts.map(p => p.value);
+        const threshold = selectedVital === "map" ? 60 : selectedVital === "hr" ? 50 : 92;
+        const thresholdPct = (100 * v.filter(val => val < threshold).length / v.length).toFixed(1);
+      
+        return {
+          norm_time: +t,
+          mean: d3.mean(v),
+          sd: d3.deviation(v),
+          thresholdPct: +thresholdPct 
+        };
         });
       return { key, values: binned.sort((a, b) => a.norm_time - b.norm_time) };
     });
@@ -178,14 +180,14 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
         hoverCircle.attr("cx", cx).attr("cy", cy).style("opacity", 1);
 
         tooltip
-          .style("opacity", 1)
-          .html(`
-            <strong>${selectedVital.toUpperCase()}</strong><br>
-            Group: ${d.key}<br>
-            Time: ${(closest.norm_time * 100).toFixed(1)}%<br>
-            Mean: ${closest.mean?.toFixed(1) ?? "N/A"}<br>
-            SD: ${closest.sd?.toFixed(1) ?? "N/A"}<br>
-            Threshold: ${thresholdSummary[d.key] ?? "N/A"}%
+        .style("opacity", 1)
+        .html(`
+          <strong>${selectedVital.toUpperCase()}</strong><br>
+          Group: ${d.key}<br>
+          Time: ${(closest.norm_time * 100).toFixed(1)}%<br>
+          Mean: ${closest.mean?.toFixed(1) ?? "N/A"}<br>
+          SD: ${closest.sd?.toFixed(1) ?? "N/A"}<br>
+          % Below Threshold: ${closest.thresholdPct ?? "N/A"}%
           `)
           .style("left", (event.pageX + 10) + "px")
           .style("top", (event.pageY - 28) + "px");
