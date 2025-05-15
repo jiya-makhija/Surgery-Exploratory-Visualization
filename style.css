@@ -45,6 +45,7 @@ body {
     display: flex;
     gap: 30px;
     align-items: flex-start;
+    margin-bottom: 40px;
   }
   
   svg {
