@@ -71,6 +71,47 @@
     <div id="legend"></div>
   </div>
 
+  <section id="writeup">
+    <h2>Design Rationale</h2>
+    <ul>
+      <li>
+        <strong>Vital Selection:</strong> We chose MAP, heart rate, SpO₂, and a calculated Stability Index because they reflect different aspects of a patient’s condition during surgery. These signals were consistently present across our dataset and offered a balanced view of physiological stability.
+      </li>
+      <li>
+        <strong>Normalized Time Axis:</strong> We displayed time as a normalized percentage to fairly compare across surgeries of different lengths. Absolute timestamps were confusing when durations varied.
+      </li>
+      <li>
+        <strong>Danger Zones:</strong> Soft-colored background regions help show when values go out of normal clinical ranges. This lets users spot risky periods quickly.
+      </li>
+      <li>
+        <strong>Interactivity:</strong> Hover tooltips, dynamic axes, and legend filtering all make the chart more engaging and let users explore different trends without cluttering the display.
+      </li>
+      <li>
+        <strong>Dark Mode:</strong> We implemented dark mode with automatic color adjustments to improve readability and accessibility in different lighting conditions.
+      </li>
+    </ul>
+
+    <h2>Development Process</h2>
+    <ul>
+      <li><strong>Time Spent:</strong></li>
+      <li><strong>Task Division:</strong>
+        <ul>
+          <li><strong>Jiya:</strong> Downloaded and cleaned the dataset, created the base D3 chart, fixed axis scaling, styled the legend, and debugged tooltip issues.</li>
+          <li><strong>Christian:</strong> Integrated all components into the webpage and ensured visual and interactive consistency across views.</li>
+          <li><strong>Nanda:</strong> Helped with data cleaning and merging, styled UI controls, implemented dark mode, and wrote the project overview and user guide.</li>
+          <li><strong>Aarshia:</strong> Explored the dataset to identify potential variables like lab results and drugs for future analysis or features.</li>
+        </ul>
+      </li>
+      <li><strong>Challenges:</strong> 
+        <ul>
+          <li>Tooltip not working with missing data — fixed by filtering empty groups.</li>
+          <li>Y-axis scaling for stability index needed custom logic because the range varied a lot.</li>
+          <li>We initially tried using absolute time but normalized time made more sense for comparison.</li>
+        </ul>
+      </li>
+    </ul>
+  </section>
+
   <footer>
     <p class="footer-note">
       Dataset: <a href="https://vitaldb.net/dataset/" target="_blank" rel="noopener">VitalDB</a> |
