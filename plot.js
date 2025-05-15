@@ -90,7 +90,7 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
     } else if (selectedVital === "hr") {
       zones = [
         { label: "Bradycardia (<50)", min: Math.max(0, yMin), max: Math.min(50, yMax), color: "#fdd" },
-        { label: "Tachycardia (>120)", min: Math.max(120, yMin), max: yMax, color: "#ffe5b4" }
+        { label: "Tachycardia (>100)", min: Math.max(100, yMin), max: yMax, color: "#ffe5b4" }
       ];
     } else if (selectedVital === "spo2") {
       zones = [
