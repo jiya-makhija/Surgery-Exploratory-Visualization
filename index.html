@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Vitals Trend Explorer</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+</head>
+<body class="dark-mode">
+
+  <div class="dark-toggle">
+    <label>
+      <input type="checkbox" id="darkModeToggle" checked> Dark Mode
+    </label>
+  </div>
+
+  <div id="tooltip" style="
+    position: absolute;
+    background: white;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    pointer-events: none;
+    opacity: 0;
+    font-size: 12px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.2);
+    z-index: 9999;
+  "></div>
+
+  <section id="overview">
+    <h2>Overview</h2>
+    <p>
+      This interactive dashboard allows you to explore patient vitals recorded in real-time during surgical procedures. 
+      By selecting different vital signs and grouping variables, you can visualize how physiological signals 
+      like heart rate, blood pressure, and oxygen saturation vary across types of surgeries and emergency conditions.
+      Highlighted danger zones and interactive legends help identify trends that may correspond with risk factors 
+      during operations. This tool is designed for researchers, clinicians, and students interested in perioperative data.
+    </p>
+  </section>
+
+  <section id="instructions">
+    <h2>How to Use</h2>
+    <ul>
+      <li><strong>Vital:</strong> Choose a vital sign <span title="e.g., HR, MAP, SpO₂, Stability Index"></span></li>
+      <li><strong>Group By:</strong> Compare trends by surgery type or emergency status</li>
+      <li><strong>Legend:</strong> Click to toggle visibility, hover to isolate a group</li>
+      <li><strong>Plot:</strong> Hover on the chart to view mean values and standard deviations over time</li>
+    </ul>
+  </section>
+
+  <section id="data-info">
+    <h2>About the Dataset</h2>
+    <p>
+      The visualizations are powered by data from the 
+      <a href="https://vitaldb.net/dataset/" target="_blank" rel="noopener">VitalDB</a> project, 
+      which contains biosignal recordings from <strong>6,388 surgeries</strong> performed at Seoul National University Hospital in South Korea. 
+      These surgeries were conducted between 2005 and 2014. The dataset provides synchronized, high-frequency intraoperative data 
+      collected from anesthesia machines and monitoring devices at a 1–500 Hz sampling rate. Each surgery record includes time-series 
+      measurements such as heart rate (HR), mean arterial pressure (MAP), oxygen saturation (SpO₂), and additional metadata such as 
+      type of surgery, emergency status, and outcome labels.
+    </p>
+    <ul>
+      <li><strong>signal:</strong> The type of biosignal (e.g., HR, MAP, SpO₂)</li>
+      <li><strong>value:</strong> The measured value at a given time</li>
+      <li><strong>norm_time:</strong> Normalized surgery timeline from 0 (start) to 1 (end)</li>
+      <li><strong>optype:</strong> Type of surgery performed</li>
+      <li><strong>emop:</strong> Whether the surgery was performed under emergency conditions</li>
+    </ul>
+  </section>
+
+  <h1>Vitals Over Time</h1>
+
+  <div id="controls">
+    <label for="vitalSelect">Vital:</label>
+    <select id="vitalSelect"></select>
+
+    <label for="groupSelect">Group By:</label>
+    <select id="groupSelect"></select>
+
+    <label for="drugSelect">Drug:</label>
+    <select id="drugSelect"></select>
+  </div>
+
+  <div id="chart-container">
+    <svg width="900" height="500"></svg>
+    <div id="legend"></div>
+  </div>
+
+  <footer>
+    <p class="footer-note">
+      Dataset: <a href="https://vitaldb.net/dataset/" target="_blank" rel="noopener">VitalDB</a> |
+      Visualization by Christian Kumagai, Nanda Payyappilly using D3.js
+    </p>
+  </footer>
+
+  <script>
+    const toggle = document.getElementById('darkModeToggle');
+    toggle.addEventListener('change', () => {
+      document.body.classList.toggle('dark-mode', toggle.checked);
+    });
+  </script>
+  <script src="plot.js"></script>
+</body>
+</html>
