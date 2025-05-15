@@ -19,7 +19,7 @@ svg.append("text")
   .attr("text-anchor", "middle")
   .attr("x", width / 2)
   .attr("y", height + margin.bottom - 5)
-  .attr("class", "axis-label")
+  .attr("class", "axis-label x-label")
   .text("Progress Through Surgery");
 
 const yLabel = svg.append("text")
@@ -27,32 +27,12 @@ const yLabel = svg.append("text")
   .attr("transform", `rotate(-90)`)
   .attr("x", -height / 2)
   .attr("y", -margin.left + 15)
-  .attr("class", "axis-label");
-
-  function updateYAxisLabel() {
-    const selectedVital = d3.select("#vitalSelect").property("value");
-    let label = "";
-  
-    if (selectedVital === "map") {
-      label = "Mean Arterial Pressure (mmHg)";
-    } else if (selectedVital === "hr") {
-      label = "Heart Rate (beats/min)";
-    } else if (selectedVital === "spo2") {
-      label = "SpO₂ (%)";
-    } else if (selectedVital === "stability_index") {
-      label = "Stability Index";
-    } else {
-      label = "Vital Value";
-    }
-  
-    yLabel.text(label);
-  }
+  .attr("class", "axis-label y-label");
 
 const xAxis = d3.axisBottom(x).tickFormat(d3.format(".0%"));
 const yAxis = d3.axisLeft(y);
 const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-// --- Create persistent hover elements outside updateChart so they're not recreated on every render ---
 const hoverLine = svg.append("line")
   .attr("class", "hover-line")
   .attr("stroke", "#aaa")
@@ -67,22 +47,16 @@ const hoverCircle = svg.append("circle")
   .attr("fill", "black")
   .style("opacity", 0);
 
-// Load long-format data
 d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
   const vitalOptions = Array.from(new Set(data.map(d => d.signal)));
   const groupOptions = ["optype", "emop"];
 
-  const vitalSelect = d3.select("#vitalSelect")
-    .selectAll("option")
-    .data(vitalOptions)
-    .enter().append("option")
-    .text(d => d.toUpperCase())
-    .attr("value", d => d);
+  d3.select("#vitalSelect").selectAll("option")
+    .data(vitalOptions).enter().append("option")
+    .text(d => d.toUpperCase()).attr("value", d => d);
 
-  const groupSelect = d3.select("#groupSelect")
-    .selectAll("option")
-    .data(groupOptions)
-    .enter().append("option")
+  d3.select("#groupSelect").selectAll("option")
+    .data(groupOptions).enter().append("option")
     .text(d => d === "optype" ? "Surgery Type" : "Emergency Status")
     .attr("value", d => d);
 
@@ -90,10 +64,7 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
 
   function renderZones(selectedVital, y) {
     svg.selectAll(".danger-zone").remove();
-
-    const yMin = y.domain()[0];
-    const yMax = y.domain()[1];
-
+    const yMin = y.domain()[0], yMax = y.domain()[1];
     let zones = [];
 
     if (selectedVital === "map") {
@@ -121,12 +92,10 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
       if (zone.min < zone.max) {
         svg.append("rect")
           .attr("class", "danger-zone")
-          .attr("x", 0)
-          .attr("width", width)
+          .attr("x", 0).attr("width", width)
           .attr("y", y(zone.max))
           .attr("height", y(zone.min) - y(zone.max))
-          .attr("fill", zone.color)
-          .attr("opacity", 0.2);
+          .attr("fill", zone.color).attr("opacity", 0.2);
       }
     });
   }
@@ -134,27 +103,21 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
   function updateChart() {
     const selectedVital = d3.select("#vitalSelect").property("value");
     const selectedGroup = d3.select("#groupSelect").property("value");
-
     const filtered = data.filter(d => d.signal === selectedVital);
     const nested = d3.groups(filtered, d => d[selectedGroup]);
 
-    
-    const label = selectedVital === "map"
-    ? "MAP (mmHg)"
-    : selectedVital === "hr"
-    ? "Heart Rate (beats/min)"
-    : selectedVital === "spo2"
-    ? "SpO₂ (%)"
-    : selectedVital === "stability_index"
-    ? "Stability Index"
-    : "Vital Value";
-  yLabel.text(label);
+    const label = selectedVital === "map" ? "MAP (mmHg)"
+                : selectedVital === "hr" ? "Heart Rate (beats/min)"
+                : selectedVital === "spo2" ? "SpO₂ (%)"
+                : selectedVital === "stability_index" ? "Stability Index"
+                : "Vital Value";
+    yLabel.text(label);
 
     let thresholdSummary = {};
     if (["map", "hr", "spo2"].includes(selectedVital)) {
       nested.forEach(([key, values]) => {
-        let threshold = selectedVital === "map" ? 60 : selectedVital === "hr" ? 50 : 92;
-        let count = values.filter(d => d.value < threshold).length;
+        const threshold = selectedVital === "map" ? 60 : selectedVital === "hr" ? 50 : 92;
+        const count = values.filter(d => d.value < threshold).length;
         thresholdSummary[key] = ((count / values.length) * 100).toFixed(1);
       });
     }
@@ -167,7 +130,7 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
           return {
             norm_time: +t,
             mean: d3.mean(v),
-            sd: d3.deviation(v),
+            sd: d3.deviation(v)
           };
         });
       return { key, values: binned.sort((a, b) => a.norm_time - b.norm_time) };
@@ -175,20 +138,15 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
 
     const visible = summary.filter(d => activeGroups.size === 0 || activeGroups.has(d.key));
 
-    if (selectedVital === "map") {
-      y.domain([40, 130]);
-    } else if (selectedVital === "hr") {
-      y.domain([40, 120]);
-    } else if (selectedVital === "spo2") {
-      y.domain([88, 100]);
-    } else {
+    if (selectedVital === "map") y.domain([40, 130]);
+    else if (selectedVital === "hr") y.domain([40, 120]);
+    else if (selectedVital === "spo2") y.domain([88, 100]);
+    else {
       y.domain([
         d3.min(visible, s => d3.min(s.values, d => d.mean - (d.sd || 0))),
         d3.max(visible, s => d3.max(s.values, d => d.mean + (d.sd || 0)))
       ]);
     }
-
-    renderZones(selectedVital, y);
 
     renderZones(selectedVital, y);
     svg.select(".x-axis").call(xAxis);
@@ -210,27 +168,13 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
       .on("mousemove", function (event, d) {
         const [xCoord] = d3.pointer(event);
         const timeAtCursor = x.invert(xCoord);
-      
         const validPoints = d.values.filter(pt => pt.mean != null);
-
-        const closest = validPoints.reduce((a, b) =>
-          Math.abs(b.norm_time - timeAtCursor) < Math.abs(a.norm_time - timeAtCursor) ? b : a
-        );
-
-      
+        const closest = validPoints.reduce((a, b) => Math.abs(b.norm_time - timeAtCursor) < Math.abs(a.norm_time - timeAtCursor) ? b : a);
         const cx = x(closest.norm_time);
         const cy = y(closest.mean);
-      
-        // Position and show hover elements
-        hoverLine
-          .attr("x1", cx)
-          .attr("x2", cx)
-          .style("opacity", 1);
-      
-        hoverCircle
-          .attr("cx", cx)
-          .attr("cy", cy)
-          .style("opacity", 1);
+
+        hoverLine.attr("x1", cx).attr("x2", cx).style("opacity", 1);
+        hoverCircle.attr("cx", cx).attr("cy", cy).style("opacity", 1);
 
         tooltip
           .style("opacity", 1)
@@ -241,61 +185,57 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
             Mean: ${closest.mean?.toFixed(1) ?? "N/A"}<br>
             SD: ${closest.sd?.toFixed(1) ?? "N/A"}<br>
             Threshold: ${thresholdSummary[d.key] ?? "N/A"}%
-            
           `)
           .style("left", (event.pageX + 10) + "px")
           .style("top", (event.pageY - 28) + "px");
       })
-      .on("mouseout", function () {
+      .on("mouseout", () => {
         tooltip.style("opacity", 0);
         hoverLine.style("opacity", 0);
         hoverCircle.style("opacity", 0);
       });
 
-      const zoneLegend = [];
-      const selectedVital = d3.select("#vitalSelect").property("value");
-      
-      if (selectedVital === "map") {
-        zoneLegend.push(
-          { label: "Low MAP (<60)", color: "#fdd" },
-          { label: "High MAP (>120)", color: "#ffe5b4" }
-        );
-      } else if (selectedVital === "hr") {
-        zoneLegend.push(
-          { label: "Bradycardia (<50)", color: "#fdd" },
-          { label: "Tachycardia (>100)", color: "#ffe5b4" }
-        );
-      } else if (selectedVital === "spo2") {
-        zoneLegend.push({ label: "Low SpO₂ (<90%)", color: "#fdd" });
-      } else if (selectedVital === "stability_index") {
-        zoneLegend.push(
-          { label: "Danger Zone (<0.5)", color: "#fdd" },
-          { label: "Caution Zone (0.5–0.75)", color: "#ffe5b4" }
-        );
-      }
-      
-      const surgeryKeys = summary.map(d => ({ label: d.key, color: color(d.key) }));
-      const fullLegend = [...zoneLegend, ...surgeryKeys];  
+    const zoneLegend = [];
+    if (selectedVital === "map") {
+      zoneLegend.push(
+        { label: "Low MAP (<60)", color: "#fdd" },
+        { label: "High MAP (>120)", color: "#ffe5b4" }
+      );
+    } else if (selectedVital === "hr") {
+      zoneLegend.push(
+        { label: "Bradycardia (<50)", color: "#fdd" },
+        { label: "Tachycardia (>100)", color: "#ffe5b4" }
+      );
+    } else if (selectedVital === "spo2") {
+      zoneLegend.push({ label: "Low SpO₂ (<90%)", color: "#fdd" });
+    } else if (selectedVital === "stability_index") {
+      zoneLegend.push(
+        { label: "Danger Zone (<0.5)", color: "#fdd" },
+        { label: "Caution Zone (0.5–0.75)", color: "#ffe5b4" }
+      );
+    }
+
+    const surgeryKeys = summary.map(d => ({ label: d.key, color: color(d.key) }));
+    const fullLegend = [...zoneLegend, ...surgeryKeys];
 
     const legendContainer = d3.select("#legend");
     legendContainer.html("");
     const legendItems = legendContainer.selectAll("div")
-      .data(summary.map(d => d.key))
-      .enter()
-      .append("div")
+      .data(fullLegend)
+      .enter().append("div")
       .attr("class", "legend-item")
       .style("cursor", "pointer")
-      .style("opacity", d => activeGroups.size === 0 || activeGroups.has(d) ? 1 : 0.3)
-      .on("click", (event, key) => {
-        if (activeGroups.has(key)) {
-          activeGroups.delete(key);
-        } else {
-          activeGroups.add(key);
-        }
+      .style("opacity", d => activeGroups.size === 0 || activeGroups.has(d.label) ? 1 : 0.3)
+      .on("click", (event, d) => {
+        if (zoneLegend.some(z => z.label === d.label)) return;
+        if (activeGroups.has(d.label)) activeGroups.delete(d.label);
+        else activeGroups.add(d.label);
         updateChart();
       })
-      .on("mouseover", (event, key) => {
-        svg.selectAll(".line").style("opacity", d => d.key === key ? 1 : 0.1);
+      .on("mouseover", (event, d) => {
+        if (!zoneLegend.some(z => z.label === d.label)) {
+          svg.selectAll(".line").style("opacity", l => l.key === d.label ? 1 : 0.1);
+        }
       })
       .on("mouseout", () => {
         svg.selectAll(".line").style("opacity", 1);
@@ -303,11 +243,11 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
 
     legendItems.append("span")
       .attr("class", "legend-color")
-      .style("background-color", d => color(d));
+      .style("background-color", d => d.color);
 
     legendItems.append("span")
       .attr("class", "legend-label")
-      .text(d => d.length > 20 ? d.slice(0, 18) + "…" : d);
+      .text(d => d.label.length > 20 ? d.label.slice(0, 18) + "…" : d.label);
   }
 
   d3.select("#vitalSelect").on("change", updateChart);
