@@ -177,9 +177,6 @@ body {
   body.dark-mode #controls label {
     color: black;
   }
-<<<<<<< Updated upstream
-  
-=======
   
   #tooltip {
     position: absolute;
@@ -202,4 +199,3 @@ body {
     color: #f3f4f6;
     box-shadow: 0 0 6px rgba(255,255,255,0.1);
   }
->>>>>>> Stashed changes
