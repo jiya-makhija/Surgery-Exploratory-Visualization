@@ -73,65 +73,82 @@
 
   <section id="rationale">
     <h2>Design Rationale</h2>
+    <p>Our project’s development journey was shaped by iterative design and reflection on the user experience. Early on, we explored various narrative directions and eventually centered the visualization around patient vital signs during surgery. The core goal was to let users visually detect instability events and understand how anesthesia may play a role. We prioritized interactivity as a means of guiding insight rather than just displaying raw data.</p>
   
-    <h3>Normalized Time Axis</h3>
-    <p>
-      We used a normalized time axis instead of actual timestamps because surgeries vary a lot in duration. Plotting them on a shared 0–100% timeline made it easier to compare trends across procedures. This helped us keep the focus on how vitals changed during the surgery—not how long the surgery was. We considered including actual time, but that made overlapping trends hard to read and created scaling problems, especially when comparing emergency and elective cases.
-    </p>
+    <p>One key feature was the implementation of a hover interaction that reveals contextual statistics at each point, specifically the raw value, mean, standard deviation, and Z-score. This allows users to interpret spikes more meaningfully. The Z-score in particular helps users without clinical expertise determine how unusual a spike is, making outliers easier to understand. This decision was driven by our desire to let users notice patterns, hover over a spike, and immediately see what might be causing it without needing to manually compare values.</p>
   
-    <h3>Vital Selection</h3>
-    <p>
-      We focused on MAP, heart rate, SpO₂, and the Stability Index because they reflect different aspects of patient stability and were consistently recorded across cases. These vitals are also ones clinicians care about during surgery. We originally looked at including more signals like ETCO₂, BIS, and drug doses, but those were either missing for too many patients or had a lot of noise. Sticking to core vitals made the trends more reliable and easier to interpret.
-    </p>
+    <p>Another major design decision was the inclusion of selectable legends. Users can click on surgery types to isolate or compare them, giving control over clutter and aiding comparison. This feature was especially useful as we transitioned away from purely aggregated trends and toward giving users more exploration power. To further help users interpret the graph, we added shaded danger zones for MAP values under 60 and over 120. This design choice came from an early observation that users unfamiliar with vitals may not know what’s clinically risky, so this encoding helps ground their observations.</p>
   
-    <h3>Interactive Hover and Tooltips</h3>
-    <p>
-      We added hover lines and tooltips to let users trace exact mean and standard deviation values over time. Just looking at lines wasn’t enough—we wanted users to know exactly when a group’s vitals dropped or spiked. Tooltips were tricky at first because they broke when groups were toggled off or had missing values. We debugged this by making sure the hover event always found the closest valid data point, even with gaps or filters applied.
-    </p>
+    <p>Throughout development, we faced challenges such as aligning data across patients and managing complexity when aggregating vitals. We considered visualizing multiple vitals at once but ultimately decided against dual y-axes for usability reasons. We also experimented with building a patient-by-patient view but found the data too sparse for meaningful conclusions at the individual level.</p>
   
-    <h3>Grouping by Surgery Type or Emergency Status</h3>
-    <p>
-      Grouping vitals by either <code>optype</code> (surgery type) or <code>emop</code> (emergency status) gave users more flexibility in exploring patterns. For example, someone might want to know how vitals behave in orthopedic surgeries vs. abdominal ones—or in emergency vs. elective cases. We thought about grouping by sex or ASA status too, but those had too many small subgroups, and the plots became too cluttered to read clearly.
-    </p>
+    <p>Overall, our design choices were motivated by clarity, interpretability, and the desire to create an experience that invites thoughtful interaction rather than passive viewing.</p>
   
-    <h3>Danger Zones</h3>
-    <p>
-      We created soft-colored danger zones for each vital to highlight when values moved into risky ranges. For instance, a MAP below 60 mmHg might signal hypoperfusion. These zones helped users visually identify instability without needing to memorize clinical thresholds. We tried showing alerts or binary flags at first, but those didn’t convey how long a value stayed in the danger range, which we felt was more important for understanding risk over time.
-    </p>
-  
-    <h3>Dark Mode and Accessibility</h3>
-    <p>
-      We added dark mode and carefully chose colors to make the visualization accessible to more users. Many people work in low-light environments, especially in clinical settings, and we wanted the chart to still feel readable and professional. We also made sure axis labels and lines stayed visible in both light and dark mode, testing multiple combinations until we found ones that didn’t cause strain or confusion.
-    </p>
-  
-    <h3>Legend Filtering and Highlighting</h3>
-    <p>
-      To avoid overwhelming users with too many lines, we made the legend interactive. Users can click to hide or isolate groups, and hover to highlight a line. Early versions of our plot looked chaotic when too many surgery types were shown at once. Adding filtering gave users control over what they were seeing and made the experience feel more focused. This also made it easier to debug group-specific patterns.
-    </p>
-  
-    <h3>Stability Index</h3>
-    <p>
-      We introduced the stability index to provide a single, interpretable metric that summarizes a patient's overall physiological state throughout surgery, making it easier to compare trends across different surgery types and anesthetic strategies. Plotting individual vitals like MAP, HR, SpO₂, ETCO₂, and BIS separately would clutter the visualization and make interpretation difficult, especially at scale. To create the index, we normalized each vital within clinically meaningful ranges (e.g., MAP: 50–110 mmHg, SpO₂: 85–100%) and averaged the values, ensuring the index was both scale-independent and clinically relevant. We considered alternatives like weighting vitals differently, but chose this approach for effectively visualizing how patients fared throughout surgery, across different surgery types. So, the stability index feature offers a clean way to track and compare patient stability over time.
-    </p>
-
-    <h2>Development Process</h2>
+    <h3>Vital-Specific Encodings</h3>
+    <p>Every vital sign behaves differently, both medically and visually. We knew early on that applying a one-size-fits-all chart wouldn’t work. So, we custom-tailored our visualization logic to each metric:</p>
     <ul>
-      <li><strong>Time Spent:</strong></li>
-      <li><strong>Task Division:</strong>
-        <ul>
-          <li style="margin-bottom: 1em;"><strong>Christian:</strong> Christian contributed over 20 people-hours to the project, focusing on HTML and CSS structure, including dark mode for better readability. He led debugging efforts and helped preprocess the dataset to support cleaner visualizations. He spent over 8 hours developing an alternate approach centered on individual patient data. Although this version was eventually scrapped due to limited data, it provided useful insights that guided the team toward group-level analysis.
-            Christian implemented interactive features like the selectable legend and hover functionality. He also introduced shaded danger zones for vitals like MAP, improving clinical interpretability. Finally, he enhanced the tooltip to include contextual statistics such as mean, standard deviation, and z-score, allowing users to better interpret variability in vital signs.</li>
-            <li style="margin-bottom: 1em;"><strong>Nanda:</strong> Nanda contributed to the project by implementing the interactive hover feature, which displays contextual statistics for each data point along the stability lines, enhancing user engagement and interpretability. She also developed the stability index metric to consolidate multiple vital signs into a single score, enabling clearer comparisons across surgeries. Additionally, she supported the data preparation process by assisting in cleaning and merging the surgical vital sign datasets to ensure accurate and consistent analysis.</li>
-            <li style="margin-bottom: 1em;"><strong>Jiya:</strong> Jiya downloaded and explored the dataset to help identify which vital signs were most reliable and relevant for visualization. She built the base D3 chart and worked on setting up the x and y axes, adjusting the scaling to fit different vitals and especially handling the edge cases for Stability Index. She also styled the legend for clarity and debugged tooltip issues, making sure tooltips displayed correctly when switching between groups. Throughout development, she focused on improving the overall readability and usability of the chart so that users could clearly see how vitals changed across different surgery types.</li>
-          <li style="margin-bottom: 1em;"><strong>Aarshia:</strong>Aarshia explored the dataset to identify additional variables that could add value to our visualization, such as lab results, medications, and event timelines. She investigated how often these features appeared across surgeries and helped assess whether they were consistent enough to be used. Even though we ultimately decided not to include them due to data sparsity, her exploration helped shape the scope of the project and kept us focused on signals that would be most meaningful and interpretable across all surgeries.</li>
-        </ul>
+      <li><strong>Stability Index:</strong> Aggregated and normalized HR, MAP, and SpO₂ into one value per time point. This allowed us to summarize systemic stability and present a clean, interpretable overview.</li>
+      <li><strong>Heart Rate (HR):</strong> Showed clinical zones for bradycardia (&lt;50 bpm) and tachycardia (&gt;100 bpm) using soft overlays, guiding attention without overloading the user.</li>
+      <li><strong>MAP (Mean Arterial Pressure):</strong> Mapped onto its own clinical danger zones (&lt;60, &gt;120 mmHg), often used to assess blood perfusion.</li>
+      <li><strong>SpO₂ (Oxygen Saturation):</strong> Marked danger below 90%, a red flag in anesthesiology and critical care.</li>
+      <li>Each graph has its own tooltip logic, axis scaling, and y-axis label, fine-tuned to reflect the real clinical implications of the data shown.</li>
+    </ul>
+    <p>We didn’t reuse visual logic across vitals because each variable has its own domain knowledge. Instead, we embraced the differences, allowing users to explore them in parallel under the same interface framework.</p>
+  
+    <h3>Why the Group-By Dropdown?</h3>
+    <p>Grouping by metadata like surgery type or emergency status allowed us to move from individual patients to population-level trends. For example:</p>
+    <ul>
+      <li>Grouping by Emergency Status revealed visibly lower stability and MAP in emergency surgeries, even without statistical tests. This supported our intuition and helped surface meaningful patterns quickly.</li>
+      <li>Grouping by Surgery Type (e.g., vascular vs. colorectal) revealed certain procedures inherently induce more fluctuation.</li>
+    </ul>
+    <p>Rather than overwhelming the user with individual patient lines, we defaulted to grouped means, allowing broad comparisons while keeping the option to drill down if desired.</p>
+  
+    <h3>Color and Zone Encoding</h3>
+    <p>Colors weren’t chosen arbitrarily. We followed these principles:</p>
+    <ul>
+      <li><strong>Categorical colors</strong> (e.g., orange vs. blue) are used when differentiating discrete groups like emergency vs. non-emergency cases.</li>
+      <li><strong>Continuous background bands</strong> (e.g., pink and yellow zones) mark clinical danger and caution thresholds. These don't distract but act as visual "guardrails" to interpret values meaningfully.</li>
+      <li>All color palettes were verified against dark mode compatibility and color vision accessibility, ensuring inclusivity.</li>
+    </ul>
+  
+    <h3>Interactivity That Guides, Not Distracts</h3>
+    <p>We included:</p>
+    <ul>
+      <li>Vital selection: Choose HR, MAP, SpO₂, or Stability Index.</li>
+      <li>Group-by filters: Toggle between surgery type, emergency status, and more.</li>
+      <li>Dark mode toggle: Improves visibility and is friendlier for prolonged clinical use.</li>
+      <li>Legends and tooltips: Provide just-in-time information without clutter.</li>
+    </ul>
+    <p>We deliberately avoided animation or auto-scrolling features to prioritize readability and stability—this was especially important given the clinical context.</p>
+  
+    <h3>Alternatives We Considered</h3>
+    <ul>
+      <li>We experimented with motion charts and stacked area plots, but both added confusion rather than clarity.</li>
+      <li>Initially tried plotting absolute timestamps, but variable surgery lengths made comparisons meaningless.</li>
+      <li>Explored overlaying drug administration timelines, but they didn’t line up well with physiological events.</li>
+    </ul>
+  
+    <p>Ultimately, we chose clarity, interpretability, and comparability over complexity.</p>
+  </section>
+  
+  <section id="team-contributions">
+    <h2>Team Contributions</h2>
+    <p><strong>Task Division:</strong></p>
+    <ul>
+      <li style="margin-bottom: 1em;">
+        <strong>Christian:</strong> Christian contributed over 20 people-hours to the project, focusing on HTML and CSS structure, including dark mode for better readability. He led debugging efforts and helped preprocess the dataset to support cleaner visualizations. He spent over 8 hours developing an alternate approach centered on individual patient data. Although this version was eventually scrapped due to limited data, it provided useful insights that guided the team toward group-level analysis.<br><br>
+        Christian implemented interactive features like the selectable legend and hover functionality. He also introduced shaded danger zones for vitals like MAP, improving clinical interpretability. Finally, he enhanced the tooltip to include contextual statistics such as mean, standard deviation, and z-score, allowing users to better interpret variability in vital signs.
       </li>
-      <li><strong>Challenges:</strong> 
-        <ul>
-          <li>Tooltip not working with missing data — fixed by filtering empty groups.</li>
-          <li>Y-axis scaling for stability index needed custom logic because the range varied a lot.</li>
-          <li>We initially tried using absolute time but normalized time made more sense for comparison.</li>
-        </ul>
+  
+      <li style="margin-bottom: 1em;">
+        <strong>Nanda:</strong> Nanda contributed to the project by implementing the interactive hover feature, which displays contextual statistics for each data point along the stability lines, enhancing user engagement and interpretability. She also developed the stability index metric to consolidate multiple vital signs into a single score, enabling clearer comparisons across surgeries. Additionally, she supported the data preparation process by assisting in cleaning and merging the surgical vital sign datasets to ensure accurate and consistent analysis.
+      </li>
+  
+      <li style="margin-bottom: 1em;">
+        <strong>Jiya:</strong> Jiya downloaded and explored the dataset to help identify which vital signs were most reliable and relevant for visualization. She built the base D3 chart and worked on setting up the x and y axes, adjusting the scaling to fit different vitals and especially handling the edge cases for Stability Index. She also styled the legend for clarity and debugged tooltip issues, making sure tooltips displayed correctly when switching between groups. Throughout development, she focused on improving the overall readability and usability of the chart so that users could clearly see how vitals changed across different surgery types.
+      </li>
+  
+      <li style="margin-bottom: 1em;">
+        <strong>Aarshia:</strong> Aarshia explored the dataset to identify additional variables that could add value to our visualization, such as lab results, medications, and event timelines. She investigated how often these features appeared across surgeries and helped assess whether they were consistent enough to be used. Even though we ultimately decided not to include them due to data sparsity, her exploration helped shape the scope of the project and kept us focused on signals that would be most meaningful and interpretable across all surgeries.
       </li>
     </ul>
   </section>
