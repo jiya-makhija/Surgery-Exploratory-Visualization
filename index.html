@@ -71,23 +71,48 @@
     <div id="legend"></div>
   </div>
 
-  <section id="writeup" margin-top="2 rem">
+  <section id="rationale">
     <h2>Design Rationale</h2>
-    <ul>
-        <li><strong>Vital Selection:</strong> We chose MAP, heart rate, SpO₂, and a calculated Stability Index because they reflect different aspects of a patient’s condition during surgery. These signals were consistently present across the dataset and offered a balanced view of physiological stability. The Stability Index was computed as the average of three normalized values — MAP (mean arterial pressure), HR (heart rate), and SpO₂ (oxygen saturation) — rescaled to a 0–1 range and averaged at each time point. This gave us a composite metric to highlight overall stability or instability during surgery.</li>
-      <li>
-        <strong>Normalized Time Axis:</strong> We displayed time as a normalized percentage to fairly compare across surgeries of different lengths. Absolute timestamps were confusing when durations varied.
-      </li>
-      <li>
-        <strong>Danger Zones:</strong> Soft-colored background regions help show when values go out of normal clinical ranges. This lets users spot risky periods quickly.
-      </li>
-      <li>
-        <strong>Interactivity:</strong> Hover tooltips, dynamic axes, and legend filtering all make the chart more engaging and let users explore different trends without cluttering the display.
-      </li>
-      <li>
-        <strong>Dark Mode:</strong> We implemented dark mode with automatic color adjustments to improve readability and accessibility in different lighting conditions.
-      </li>
-    </ul>
+  
+    <h3>Normalized Time Axis</h3>
+    <p>
+      We used a normalized time axis instead of actual timestamps because surgeries vary a lot in duration. Plotting them on a shared 0–100% timeline made it easier to compare trends across procedures. This helped us keep the focus on how vitals changed during the surgery—not how long the surgery was. We considered including actual time, but that made overlapping trends hard to read and created scaling problems, especially when comparing emergency and elective cases.
+    </p>
+  
+    <h3>Vital Selection</h3>
+    <p>
+      We focused on MAP, heart rate, SpO₂, and the Stability Index because they reflect different aspects of patient stability and were consistently recorded across cases. These vitals are also ones clinicians care about during surgery. We originally looked at including more signals like ETCO₂, BIS, and drug doses, but those were either missing for too many patients or had a lot of noise. Sticking to core vitals made the trends more reliable and easier to interpret.
+    </p>
+  
+    <h3>Interactive Hover and Tooltips</h3>
+    <p>
+      We added hover lines and tooltips to let users trace exact mean and standard deviation values over time. Just looking at lines wasn’t enough—we wanted users to know exactly when a group’s vitals dropped or spiked. Tooltips were tricky at first because they broke when groups were toggled off or had missing values. We debugged this by making sure the hover event always found the closest valid data point, even with gaps or filters applied.
+    </p>
+  
+    <h3>Grouping by Surgery Type or Emergency Status</h3>
+    <p>
+      Grouping vitals by either <code>optype</code> (surgery type) or <code>emop</code> (emergency status) gave users more flexibility in exploring patterns. For example, someone might want to know how vitals behave in orthopedic surgeries vs. abdominal ones—or in emergency vs. elective cases. We thought about grouping by sex or ASA status too, but those had too many small subgroups, and the plots became too cluttered to read clearly.
+    </p>
+  
+    <h3>Danger Zones</h3>
+    <p>
+      We created soft-colored danger zones for each vital to highlight when values moved into risky ranges. For instance, a MAP below 60 mmHg might signal hypoperfusion. These zones helped users visually identify instability without needing to memorize clinical thresholds. We tried showing alerts or binary flags at first, but those didn’t convey how long a value stayed in the danger range, which we felt was more important for understanding risk over time.
+    </p>
+  
+    <h3>Dark Mode and Accessibility</h3>
+    <p>
+      We added dark mode and carefully chose colors to make the visualization accessible to more users. Many people work in low-light environments, especially in clinical settings, and we wanted the chart to still feel readable and professional. We also made sure axis labels and lines stayed visible in both light and dark mode, testing multiple combinations until we found ones that didn’t cause strain or confusion.
+    </p>
+  
+    <h3>Legend Filtering and Highlighting</h3>
+    <p>
+      To avoid overwhelming users with too many lines, we made the legend interactive. Users can click to hide or isolate groups, and hover to highlight a line. Early versions of our plot looked chaotic when too many surgery types were shown at once. Adding filtering gave users control over what they were seeing and made the experience feel more focused. This also made it easier to debug group-specific patterns.
+    </p>
+  
+    <h3>Stability Index</h3>
+    <p>
+      We introduced the stability index to provide a single, interpretable metric that summarizes a patient's overall physiological state throughout surgery, making it easier to compare trends across different surgery types and anesthetic strategies. Plotting individual vitals like MAP, HR, SpO₂, ETCO₂, and BIS separately would clutter the visualization and make interpretation difficult, especially at scale. To create the index, we normalized each vital within clinically meaningful ranges (e.g., MAP: 50–110 mmHg, SpO₂: 85–100%) and averaged the values, ensuring the index was both scale-independent and clinically relevant. We considered alternatives like weighting vitals differently, but chose this approach for effectively visualizing how patients fared throughout surgery, across different surgery types. So, the stability index feature offers a clean way to track and compare patient stability over time.
+    </p>
 
     <h2>Development Process</h2>
     <ul>
@@ -95,9 +120,9 @@
       <li><strong>Task Division:</strong>
         <ul>
           <li><strong>Christian:</strong> Integrated all components into the webpage and ensured visual and interactive consistency across views.</li>
-          <li><strong>Nanda:</strong> Helped with data cleaning and merging, styled UI controls, implemented dark mode, and wrote the project overview and user guide.</li>
-          <li><strong>Jiya:</strong> Downloaded and cleaned the dataset, created the base D3 chart, fixed axis scaling, styled the legend, and debugged tooltip issues.</li>
-          <li><strong>Aarshia:</strong> Explored the dataset to identify potential variables like lab results and drugs for future analysis or features.</li>
+          <li><strong>Nanda:</strong> Cleaned and merged the dataset, implemented dark mode and UI controls, and created the Stability Index feature.</li>
+          <li><strong>Jiya:</strong> Downloaded and cleaned the dataset, created the base D3 chart, fixed y-axis scaling, styled the legend, and debugged tooltip rendering issues.</li>
+          <li><strong>Aarshia:</strong> Explored the dataset to identify potential variables like lab results and drugs for future analysis or feature integration.</li>
         </ul>
       </li>
       <li><strong>Challenges:</strong> 
@@ -113,7 +138,7 @@
   <footer>
     <p class="footer-note">
       Dataset: <a href="https://vitaldb.net/dataset/" target="_blank" rel="noopener">VitalDB</a> |
-      Visualization by Christian Kumagai, Nanda Payyappilly, Jiya Makhija using D3.js
+      Visualization by Christian Kumagai, Nanda Payyappilly, Jiya Makhija, Aarshia Gupta using D3.js
     </p>
   </footer>
 
