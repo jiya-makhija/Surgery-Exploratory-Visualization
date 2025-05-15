@@ -197,7 +197,7 @@ body {
   }
 
   body.dark-mode #controls label {
-    color: black;
+    color: white;
   }
   
   #tooltip {
