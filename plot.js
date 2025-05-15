@@ -138,10 +138,10 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
     if (selectedVital === "map") y.domain([40, 130]);
     else if (selectedVital === "hr") y.domain([40, 120]);
     else if (selectedVital === "spo2") y.domain([88, 100]);
-    else {
+    else if (selectedVital === "stability_index") {
       y.domain([
-        d3.min(visible, s => d3.min(s.values, d => d.mean - (d.sd || 0))),
-        d3.max(visible, s => d3.max(s.values, d => d.mean + (d.sd || 0)))
+        d3.min(visible, s => d3.min(s.values, d => d.mean - (d.sd || 0))) || 0,
+        d3.max(visible, s => d3.max(s.values, d => d.mean + (d.sd || 0))) || 100
       ]);
     }
 
