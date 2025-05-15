@@ -71,12 +71,10 @@
     <div id="legend"></div>
   </div>
 
-  <section id="writeup">
+  <section id="writeup" margin-top="2 rem">
     <h2>Design Rationale</h2>
     <ul>
-      <li>
         <li><strong>Vital Selection:</strong> We chose MAP, heart rate, SpO₂, and a calculated Stability Index because they reflect different aspects of a patient’s condition during surgery. These signals were consistently present across the dataset and offered a balanced view of physiological stability. The Stability Index was computed as the average of three normalized values — MAP (mean arterial pressure), HR (heart rate), and SpO₂ (oxygen saturation) — rescaled to a 0–1 range and averaged at each time point. This gave us a composite metric to highlight overall stability or instability during surgery.</li>
-      </li>
       <li>
         <strong>Normalized Time Axis:</strong> We displayed time as a normalized percentage to fairly compare across surgeries of different lengths. Absolute timestamps were confusing when durations varied.
       </li>
