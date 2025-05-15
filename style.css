@@ -177,4 +177,29 @@ body {
   body.dark-mode #controls label {
     color: black;
   }
+<<<<<<< Updated upstream
   
+=======
+  
+  #tooltip {
+    position: absolute;
+    background: white;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    pointer-events: none;
+    opacity: 0;
+    font-size: 12px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.2);
+    color: #111827;
+    z-index: 9999;
+    transition: background 0.3s, color 0.3s;
+  }
+  
+  body.dark-mode #tooltip {
+    background: #1e293b;
+    border: 1px solid #374151;
+    color: #f3f4f6;
+    box-shadow: 0 0 6px rgba(255,255,255,0.1);
+  }
+>>>>>>> Stashed changes
