@@ -29,10 +29,24 @@ const yLabel = svg.append("text")
   .attr("y", -margin.left + 15)
   .attr("class", "axis-label");
 
-function updateYAxisLabel() {
-  const selectedVital = d3.select("#vitalSelect").property("value");
-  yLabel.text(selectedVital === "stability_index" ? "Stability Index" : "Vital Value");
-}
+  function updateYAxisLabel() {
+    const selectedVital = d3.select("#vitalSelect").property("value");
+    let label = "";
+  
+    if (selectedVital === "map") {
+      label = "Mean Arterial Pressure (mmHg)";
+    } else if (selectedVital === "hr") {
+      label = "Heart Rate (beats/min)";
+    } else if (selectedVital === "spo2") {
+      label = "SpO₂ (%)";
+    } else if (selectedVital === "stability_index") {
+      label = "Stability Index";
+    } else {
+      label = "Vital Value";
+    }
+  
+    yLabel.text(label);
+  }
 
 const xAxis = d3.axisBottom(x).tickFormat(d3.format(".0%"));
 const yAxis = d3.axisLeft(y);
