@@ -51,9 +51,12 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
   const vitalOptions = Array.from(new Set(data.map(d => d.signal)));
   const groupOptions = ["optype", "emop"];
 
-  d3.select("#vitalSelect").selectAll("option")
-    .data(vitalOptions).enter().append("option")
-    .text(d => d.toUpperCase()).attr("value", d => d);
+  const vitalSelect = d3.select("#vitalSelect")
+  .selectAll("option")
+  .data(vitalOptions)
+  .enter().append("option")
+  .text(d => d.replace(/_/g, " ").toUpperCase())
+  .attr("value", d => d);
 
   d3.select("#groupSelect").selectAll("option")
     .data(groupOptions).enter().append("option")
