@@ -247,7 +247,9 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
 
     legendItems.append("span")
       .attr("class", "legend-label")
-      .text(d => d.label.length > 20 ? d.label.slice(0, 18) + "…" : d.label);
+      .text(d => d.label)
+      .style("white-space", "normal")
+      .style("word-break", "break-word");
   }
 
   d3.select("#vitalSelect").on("change", updateChart);
