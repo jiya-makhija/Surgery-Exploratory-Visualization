@@ -124,6 +124,18 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
     const filtered = data.filter(d => d.signal === selectedVital);
     const nested = d3.groups(filtered, d => d[selectedGroup]);
 
+    
+    const label = selectedVital === "map"
+    ? "MAP (mmHg)"
+    : selectedVital === "hr"
+    ? "Heart Rate (beats/min)"
+    : selectedVital === "spo2"
+    ? "SpO₂ (%)"
+    : selectedVital === "stability_index"
+    ? "Stability Index"
+    : "Vital Value";
+  yLabel.text(label);
+
     let thresholdSummary = {};
     if (["map", "hr", "spo2"].includes(selectedVital)) {
       nested.forEach(([key, values]) => {
@@ -149,10 +161,20 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
 
     const visible = summary.filter(d => activeGroups.size === 0 || activeGroups.has(d.key));
 
-    y.domain([
-      d3.min(visible, s => d3.min(s.values, d => d.mean - (d.sd || 0))),
-      d3.max(visible, s => d3.max(s.values, d => d.mean + (d.sd || 0)))
-    ]);
+    if (selectedVital === "map") {
+      y.domain([40, 130]);
+    } else if (selectedVital === "hr") {
+      y.domain([40, 120]);
+    } else if (selectedVital === "spo2") {
+      y.domain([88, 100]);
+    } else {
+      y.domain([
+        d3.min(visible, s => d3.min(s.values, d => d.mean - (d.sd || 0))),
+        d3.max(visible, s => d3.max(s.values, d => d.mean + (d.sd || 0)))
+      ]);
+    }
+
+    renderZones(selectedVital, y);
 
     renderZones(selectedVital, y);
     svg.select(".x-axis").call(xAxis);
