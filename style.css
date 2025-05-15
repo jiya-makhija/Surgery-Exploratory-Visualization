@@ -182,7 +182,19 @@ body {
     color: #e5e7eb;
     border: 1px solid #374151;
   }
+
+  body.dark-mode #controls {
+    background-color: #1e293b; 
+    border: 1px solid #374151; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3); 
+  }
   
+  
+  body.dark-mode #controls select {
+    background-color: #374151;
+    color: #e5e7eb;
+    border: 1px solid #4b5563;
+  }
 
   body.dark-mode #controls label {
     color: black;
