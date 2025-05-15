@@ -252,6 +252,31 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
         hoverCircle.style("opacity", 0);
       });
 
+      const zoneLegend = [];
+      const selectedVital = d3.select("#vitalSelect").property("value");
+      
+      if (selectedVital === "map") {
+        zoneLegend.push(
+          { label: "Low MAP (<60)", color: "#fdd" },
+          { label: "High MAP (>120)", color: "#ffe5b4" }
+        );
+      } else if (selectedVital === "hr") {
+        zoneLegend.push(
+          { label: "Bradycardia (<50)", color: "#fdd" },
+          { label: "Tachycardia (>100)", color: "#ffe5b4" }
+        );
+      } else if (selectedVital === "spo2") {
+        zoneLegend.push({ label: "Low SpO₂ (<90%)", color: "#fdd" });
+      } else if (selectedVital === "stability_index") {
+        zoneLegend.push(
+          { label: "Danger Zone (<0.5)", color: "#fdd" },
+          { label: "Caution Zone (0.5–0.75)", color: "#ffe5b4" }
+        );
+      }
+      
+      const surgeryKeys = summary.map(d => ({ label: d.key, color: color(d.key) }));
+      const fullLegend = [...zoneLegend, ...surgeryKeys];  
+
     const legendContainer = d3.select("#legend");
     legendContainer.html("");
     const legendItems = legendContainer.selectAll("div")
