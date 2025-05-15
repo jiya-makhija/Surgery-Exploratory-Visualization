@@ -67,7 +67,15 @@ body {
   .legend-item {
     display: flex;
     align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
     transition: opacity 0.2s ease;
+  }
+
+  .legend-label {
+    max-width: fit-content; 
+    white-space: normal;
+    word-break: break-word;
   }
   
   .legend-color {
@@ -221,7 +229,7 @@ body {
     color: #f3f4f6;
     box-shadow: 0 0 6px rgba(255,255,255,0.1);
   }
-  
+
   body.dark-mode .axis-label {
     fill: #ffffff;
   }
