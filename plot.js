@@ -115,8 +115,7 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
                 : selectedVital === "stability_index" ? "Stability Index"
                 : "Vital Value";
     yLabel.text(label);
-    
-    
+
     const summary = nested.map(([key, values]) => {
       const binSize = 0.01;
       const binned = d3.groups(values, d => Math.round(d.norm_time / binSize) * binSize)
@@ -124,16 +123,12 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
           const v = pts.map(p => p.value);
           const mean = d3.mean(v);
           const sd = d3.deviation(v) || 0;
-          let zScore = null;
-          if (sd > 0 && v.length > 0) {
-            zScore = d3.mean(v.map(val => Math.abs((val - mean) / sd)));
-          }
+          const zScore = (sd > 0 && v.length > 0) ? d3.mean(v.map(val => Math.abs((val - mean) / sd))) : null;
           return {
             norm_time: +t,
             mean: mean,
             sd: sd,
-            values: v,
-            zScores: v.map(val => sd ? (val - mean) / sd : 0)
+            zScore: zScore
           };
         });
       return { key, values: binned.sort((a, b) => a.norm_time - b.norm_time) };
@@ -187,10 +182,6 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
         hoverLine.attr("x1", cx).attr("x2", cx).style("opacity", 1);
         hoverCircle.attr("cx", cx).attr("cy", cy).style("opacity", 1);
 
-        const avgZScore = closest.zScores && closest.zScores.length
-          ? d3.mean(closest.zScores.map(Math.abs)).toFixed(2)
-          : "N/A";
-
         tooltip
           .style("opacity", 1)
           .html(`
@@ -199,8 +190,11 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
             Time: ${(closest.norm_time * 100).toFixed(1)}%<br>
             Mean: ${closest.mean?.toFixed(1) ?? "N/A"}<br>
             SD: ${closest.sd?.toFixed(1) ?? "N/A"}<br>
-            Avg Z-Score: ${avgZScore}
+            Avg Z-Score: ${closest.zScore != null ? closest.zScore.toFixed(2) : "N/A"}<br>
           `)
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 28) + "px");
+      })
       .on("mouseout", () => {
         tooltip.style("opacity", 0);
         hoverLine.style("opacity", 0);
