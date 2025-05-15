@@ -123,7 +123,11 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
         .map(([t, pts]) => {
           const v = pts.map(p => p.value);
           const mean = d3.mean(v);
-          const sd = d3.deviation(v);
+          const sd = d3.deviation(v) || 0;
+          let zScore = null;
+          if (sd > 0 && v.length > 0) {
+            zScore = d3.mean(v.map(val => Math.abs((val - mean) / sd)));
+          }
           return {
             norm_time: +t,
             mean: mean,
