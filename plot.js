@@ -131,7 +131,9 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
       return { key, values: binned.sort((a, b) => a.norm_time - b.norm_time) };
     });
 
-    const visible = summary.filter(d => activeGroups.size === 0 || activeGroups.has(d.key));
+    const visible = summary
+      .filter(d => activeGroups.size === 0 || activeGroups.has(d.key))
+      .filter(d => d.values.length > 0);
 
     if (selectedVital === "map") y.domain([40, 130]);
     else if (selectedVital === "hr") y.domain([40, 120]);
