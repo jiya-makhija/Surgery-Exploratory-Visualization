@@ -115,37 +115,18 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
                 : selectedVital === "stability_index" ? "Stability Index"
                 : "Vital Value";
     yLabel.text(label);
-
-    let threshold = null;
-    if (selectedVital === "map") threshold = 60;
-    if (selectedVital === "hr") threshold = 50;
-    if (selectedVital === "spo2") threshold = 92;
-
+    
+    
     const summary = nested.map(([key, values]) => {
       const binSize = 0.01;
       const binned = d3.groups(values, d => Math.round(d.norm_time / binSize) * binSize)
-      .map(([t, pts]) => {
-        const v = pts.map(p => p.value);
-        const mean = d3.mean(v);
-        const sd = d3.deviation(v);
-        
-        const threshold = selectedVital === "map" ? 60
-                        : selectedVital === "hr" ? 50
-                        : selectedVital === "spo2" ? 92
-                        : null;
-      
-        let thresholdPct = null;
-        if (threshold !== null) {
-          const below = v.filter(val => val < threshold).length;
-          thresholdPct = ((below / v.length) * 100).toFixed(1);
-        }
-      
-        return {
-          norm_time: +t,
-          mean,
-          sd,
-          thresholdPct
-        };
+        .map(([t, pts]) => {
+          const v = pts.map(p => p.value);
+          return {
+            norm_time: +t,
+            mean: d3.mean(v),
+            sd: d3.deviation(v)
+          };
         });
       return { key, values: binned.sort((a, b) => a.norm_time - b.norm_time) };
     });
@@ -198,7 +179,6 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
           Time: ${(closest.norm_time * 100).toFixed(1)}%<br>
           Mean: ${closest.mean?.toFixed(1) ?? "N/A"}<br>
           SD: ${closest.sd?.toFixed(1) ?? "N/A"}<br>
-          % Below Threshold: ${closest.thresholdPct ?? "N/A"}%
           `)
           .style("left", (event.pageX + 10) + "px")
           .style("top", (event.pageY - 28) + "px");
