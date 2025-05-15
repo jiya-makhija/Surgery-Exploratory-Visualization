@@ -163,13 +163,14 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
       .on("mousemove", function (event, d) {
         const [xCoord] = d3.pointer(event);
         const timeAtCursor = x.invert(xCoord);
-        const validPoints = d.values.filter(pt => pt.mean != null);
-        if (validPoints.length === 0) return;
-
+        const validPoints = d.values.filter(pt => pt.mean != null && pt.norm_time != null);
         if (validPoints.length === 0) return;
 
         const closest = validPoints.reduce((a, b) =>
           Math.abs(b.norm_time - timeAtCursor) < Math.abs(a.norm_time - timeAtCursor) ? b : a, validPoints[0]);
+
+        if (!closest || typeof closest.mean !== "number") return;
+
         const cx = x(closest.norm_time);
         const cy = y(closest.mean);
 
@@ -177,14 +178,14 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
         hoverCircle.attr("cx", cx).attr("cy", cy).style("opacity", 1);
 
         tooltip
-        .style("opacity", 1)
-        .html(`
-          <strong>${selectedVital.toUpperCase()}</strong><br>
-          Group: ${d.key}<br>
-          Time: ${(closest.norm_time * 100).toFixed(1)}%<br>
-          Mean: ${closest.mean?.toFixed(1) ?? "N/A"}<br>
-          SD: ${closest.sd?.toFixed(1) ?? "N/A"}<br>
-          `)
+          .style("opacity", 1)
+          .html(`
+            <strong>${selectedVital.toUpperCase()}</strong><br>
+            Group: ${d.key}<br>
+            Time: ${(closest.norm_time * 100).toFixed(1)}%<br>
+            Mean: ${closest.mean?.toFixed(1) ?? "N/A"}<br>
+            SD: ${closest.sd?.toFixed(1) ?? "N/A"}<br>
+            `)
           .style("left", (event.pageX + 10) + "px")
           .style("top", (event.pageY - 28) + "px");
       })
