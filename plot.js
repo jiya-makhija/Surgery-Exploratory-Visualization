@@ -126,14 +126,25 @@ d3.csv("data/vitals_long_format_10s.csv", d3.autoType).then(data => {
       const binned = d3.groups(values, d => Math.round(d.norm_time / binSize) * binSize)
       .map(([t, pts]) => {
         const v = pts.map(p => p.value);
-        const threshold = selectedVital === "map" ? 60 : selectedVital === "hr" ? 50 : 92;
-        const thresholdPct = (100 * v.filter(val => val < threshold).length / v.length).toFixed(1);
+        const mean = d3.mean(v);
+        const sd = d3.deviation(v);
+        
+        const threshold = selectedVital === "map" ? 60
+                        : selectedVital === "hr" ? 50
+                        : selectedVital === "spo2" ? 92
+                        : null;
+      
+        let thresholdPct = null;
+        if (threshold !== null) {
+          const below = v.filter(val => val < threshold).length;
+          thresholdPct = ((below / v.length) * 100).toFixed(1);
+        }
       
         return {
           norm_time: +t,
-          mean: d3.mean(v),
-          sd: d3.deviation(v),
-          thresholdPct: +thresholdPct 
+          mean,
+          sd,
+          thresholdPct
         };
         });
       return { key, values: binned.sort((a, b) => a.norm_time - b.norm_time) };
