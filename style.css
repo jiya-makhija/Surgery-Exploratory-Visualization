@@ -138,16 +138,22 @@ body {
     border-radius: 6px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.08);
     z-index: 999;
+    transition: background 0.3s, color 0.3s;
   }
   
   body.dark-mode {
     background-color: #111827;
     color: #e5e7eb;
   }
-
+  
+  body.dark-mode .dark-toggle {
+    background: #1f2937; 
+    border: 1px solid #374151;
+  }
+  
   body.dark-mode .dark-toggle label {
-  color: #e5e7eb;
-}
+    color: #e5e7eb;
+  }
   
   body.dark-mode h1,
   body.dark-mode section h2 {
