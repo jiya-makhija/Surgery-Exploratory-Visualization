@@ -141,9 +141,13 @@ body {
   }
   
   body.dark-mode {
-    background-color: #111827;
+    background-color: #374151;
     color: #e5e7eb;
   }
+
+  body.dark-mode .dark-toggle label {
+  color: #e5e7eb;
+}
   
   body.dark-mode h1,
   body.dark-mode section h2 {
